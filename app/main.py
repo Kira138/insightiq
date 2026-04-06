@@ -8,6 +8,7 @@ from kpi_engine import get_SLA_Compliance_byMonth
 from kpi_engine import get_category_wise_sales_growth
 from kpi_engine import get_seller_performance_score
 import plotly.graph_objects as go
+from ai_summaries import generate_kpi_summary
 
 # ── PAGE CONFIG ──────────────────────────────
 st.set_page_config(
@@ -74,6 +75,14 @@ with col1:
        
     )
     st.plotly_chart(fig)
+    if st.button("Revenue Insight"):
+        with st.spinner("Generating insight..."):
+            summary = generate_kpi_summary(
+                "Total Revenue",
+                f"R$ {current:,.0f}",
+                delta
+            )
+            st.info(summary)
 #f"R$ {current:,.0f}" explained:
 #f" " → f-string (inserts variable)
 #{current:,.0f} → formats number with commas, no decimals
@@ -111,6 +120,14 @@ with col2:
         labels={'total_orders': 'Orders', 'year_month': 'Month'}
     )
     st.plotly_chart(fig)
+    if st.button("Order Volume Insight"):
+        with st.spinner("Generating insight..."):
+            summary = generate_kpi_summary(
+                "Order Volume",
+                f"{current:,.0f} orders",
+                delta
+            )
+            st.info(summary)
 #───────────────────── AOV KPI Card & line graph───────────────────────────
 with col3:
     df_AOV= get_AOV()
@@ -134,6 +151,14 @@ with col3:
         labels={'aov': 'AOV', 'year_month': 'Month'}
     )
     st.plotly_chart(fig)
+    if st.button("AOV Insight"):
+        with st.spinner("Generating insight..."):
+            summary = generate_kpi_summary(
+                "AOV",
+                f" {current:,.0f}",
+                delta
+            )
+            st.info(summary)
 #───────────────────── SLA_Compliance KPI Card & line graph───────────────────────────
 with col4:
     df_SLA= get_SLA_Compliance_byMonth()
@@ -157,8 +182,67 @@ with col4:
         labels={'sla_compliance_pct': 'SLA%', 'year_month': 'Month'}
     )
     st.plotly_chart(fig)
+    if st.button("SLA Compliance Insight"):
+        with st.spinner("Generating insight..."):
+            summary = generate_kpi_summary(
+                "SLA Compliance",
+                f"{current:,.1f}",
+                delta
+            )
+            st.info(summary)
+    st.markdown("---")  # divider line
+
+if st.button("📊 Generate Full Report"):
+    with st.spinner("Generating full report..."):
+        st.subheader("📋 Executive Summary Report")
+        
+        # Revenue summary
+        df_rev = get_monthly_revenue()
+        df_f = df_rev[(df_rev['year_month']>=start_date) & (df_rev['year_month']<=end_date)]
+        current = df_f['total_revenue'].iloc[-1]
+        previous = df_f['total_revenue'].iloc[-2]
+        delta = (current-previous)/previous*100
+        st.write("**Revenue:**")
+        st.info(generate_kpi_summary("Total Revenue", f"R$ {current:,.0f}", delta))
+        
+        # Orders summary
+        df_order_volume= get_order_volume()
+        df_filtered=df_order_volume[
+        (df_order_volume['year_month']>=start_date) &
+        (df_order_volume['year_month']<=end_date)
+        ]
+        current=df_filtered['total_orders'].iloc[-1]
+        previous=df_filtered['total_orders'].iloc[-2]
+        delta=(current-previous)/previous*100
+        st.write("**Order Volume:**")
+        st.info(generate_kpi_summary("Order Volume", f" {current:,.0f} order", delta))
+
+        # AOV summary
+        df_AOV= get_AOV()
+        df_filtered=df_AOV[
+        (df_AOV['year_month']>=start_date) &
+        (df_AOV['year_month']<=end_date)
+        ]
+        current=df_filtered['aov'].iloc[-1]
+        previous=df_filtered['aov'].iloc[-2]
+        delta=(current-previous)/previous*100
+        st.write("**AOV:**")
+        st.info(generate_kpi_summary("AOV", f"{current:,.0f}", delta))
+
+        # SLA summary
+        df_SLA= get_SLA_Compliance_byMonth()
+        df_filtered=df_SLA[
+        (df_SLA['year_month']>=start_date) &
+        (df_SLA['year_month']<=end_date)
+        ]
+        current=df_filtered['sla_compliance_pct'].iloc[-1]
+        previous=df_filtered['sla_compliance_pct'].iloc[-2]
+        delta=(current-previous)/previous*100
+        st.write("**SLA Compliance:**")
+        st.info(generate_kpi_summary("SLA Compliance", f"{current:,.1f}", delta))
+        # your generate_kpi_summary call here
 #───────────────────── Category wise revenue & treemap───────────────────────────
-    with col_left:
+with col_left:
         df_category=get_category_wise_sales_growth()
         df_filtered=df_category[
         (df_category['year_month']>=start_date) &
@@ -173,7 +257,7 @@ with col4:
         )
         st.plotly_chart(fig)
 
-    with col_right:
+with col_right:
        pass # empty for now — add chart later!
 
 #─────────────────────Seller leaderboard table with sort/filter────────────────
