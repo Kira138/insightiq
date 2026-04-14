@@ -51,6 +51,7 @@ page = st.sidebar.radio(
 st.sidebar.markdown("---")
 st.sidebar.subheader("📁 Upload Your Data")
 uploaded_file = st.sidebar.file_uploader("Upload CSV file", type=['csv'])
+accept_multiple_files=True 
 if uploaded_file is None:
    col1, col2 , col3, col4 = st.columns(4)
    col_left, col_right = st.columns(2)
