@@ -4,13 +4,16 @@
 # ============================================================
 import anthropic
 import os
+from dotenv import load_dotenv
 
-# ── INITIALIZE CLIENT ─────────────────────────────────────
+# ── INITIALIZE CLIENT, Setup (runs once at import time) ─────────────────────────────────────
+load_dotenv()
 client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
-# ── GENERATE KPI SUMMARY ──────────────────────────────────
+# ── GENERATE KPI SUMMARY,Three values get passed in — kpi_name, current_value, delta. context defaults to "" since it wasn't provided. ──────────────────────────────────
 def generate_kpi_summary(kpi_name, current_value, delta, context=""):
-    prompt = f"""
+#Claude receives this as its instruction giving it the role of a business analyst and telling it exactly what to write.
+    prompt = f"""   
     You are a business analyst. Write a 2-sentence executive summary for this KPI:
     
     KPI: {kpi_name}
@@ -20,7 +23,7 @@ def generate_kpi_summary(kpi_name, current_value, delta, context=""):
     
     Be concise, business-focused, and actionable.
     """
-    
+#── prompt is sent to Claude Haiku. Claude reads it and generates a 2-sentence executive summary, capped at 150 tokens.
     message = client.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=150,

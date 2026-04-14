@@ -22,7 +22,7 @@ st.title("📊 InsightIQ — Business Intelligence Dashboard")
 st.markdown("AI-Powered Analytics for Olist E-Commerce")
 
 # ── SIDEBAR ──────────────────────────────────
-st.sidebar.title("🔍 Filters")
+st.sidebar.title("Filters")
 st.sidebar.markdown("---")
 
 # Date range filter
@@ -280,5 +280,41 @@ fig=go.Figure(data=[go.Table(
 fig.update_layout(title='Leaderboard')
 #fig.show()
 st.plotly_chart(fig)
+#-------------------------CSV File---------------------------------------
+st.sidebar.markdown("---")
+st.sidebar.subheader("Upload Your Data")
+uploaded_file = st.sidebar.file_uploader("Upload CSV file", type=['csv'])
 
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
     
+    if len(df.columns) < 2:      # ← check columns FIRST!
+      st.error("File needs at least 2 columns!")
+      st.stop()
+    elif df.empty:                # ← then check empty
+      st.error("Uploaded file is empty!")
+    else: 
+      st.success(f"File uploaded! {len(df)} rows, {len(df.columns)} columns")
+      # Show preview
+      st.subheader("📋 Data Preview")
+      st.dataframe(df.head())
+      # Column selectors
+      date_col = st.selectbox(
+      "Select date column", 
+      ["-- Select --"] + list(df.columns)
+)
+      value_col = st.selectbox("Select value column", ["-- Select --"] + list(df.columns))
+# ----------------After column selectors--------------------------------------
+    if date_col != "-- Select --" and value_col != "-- Select --":
+       if date_col == value_col:
+         st.warning("⚠️ Please select different columns!")
+       else:
+          df[date_col] = pd.to_datetime(df[date_col])
+          df = df.sort_values(by=date_col)
+          fig = px.line(
+            df,
+            x=date_col,
+            y=value_col,
+            title=f'{value_col} over time'
+           )
+          st.plotly_chart(fig)
