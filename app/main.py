@@ -9,6 +9,7 @@ from kpi_engine import get_category_wise_sales_growth
 from kpi_engine import get_seller_performance_score
 import plotly.graph_objects as go
 from ai_summaries import generate_kpi_summary
+from pdf_export import generate_pdf
 
 # ── PAGE CONFIG ──────────────────────────────
 st.set_page_config(
@@ -62,13 +63,13 @@ if uploaded_file is None:
      (df_revenue['year_month']>=start_date) &
      (df_revenue['year_month']<=end_date)
      ]
-     current=df_filtered['total_revenue'].iloc[-1]
-     previous=df_filtered['total_revenue'].iloc[-2]
-     delta=(current-previous)/previous*100
+     rev_current=df_filtered['total_revenue'].iloc[-1]
+     rev_previous=df_filtered['total_revenue'].iloc[-2]
+     rev_delta=(rev_current-rev_previous)/rev_previous*100
      st.metric(
       label="Total Revenue",
-      value=f"R$ {current:,.0f}",
-      delta=f"{delta:.1f}%"
+      value=f"R$ {rev_current:,.0f}",
+      delta=f"{rev_delta:.1f}%"
      )
      fig = px.line(                
         df_filtered,        
@@ -83,8 +84,8 @@ if uploaded_file is None:
         with st.spinner("Generating insight..."):
             summary = generate_kpi_summary(
                 "Total Revenue",
-                f"R$ {current:,.0f}",
-                delta
+                f"R$ {rev_current:,.0f}",
+                rev_delta
             )
             st.info(summary)
 #f"R$ {current:,.0f}" explained:
@@ -108,13 +109,13 @@ if uploaded_file is None:
      (df_order_volume['year_month']>=start_date) &
      (df_order_volume['year_month']<=end_date)
      ]
-     current=df_filtered['total_orders'].iloc[-1]
-     previous=df_filtered['total_orders'].iloc[-2]
-     delta=(current-previous)/previous*100
+     ord_current=df_filtered['total_orders'].iloc[-1]
+     ord_previous=df_filtered['total_orders'].iloc[-2]
+     ord_delta=(ord_current-ord_previous)/ord_previous*100
      st.metric(
        label="Order Volume",
-       value=f"{current:,.0f}",
-       delta=f"{delta:.1f}%"
+       value=f"{ord_current:,.0f}",
+       delta=f"{ord_delta:.1f}%"
      )
      fig = px.line(                
         df_filtered,        
@@ -128,8 +129,8 @@ if uploaded_file is None:
         with st.spinner("Generating insight..."):
             summary = generate_kpi_summary(
                 "Order Volume",
-                f"{current:,.0f} orders",
-                delta
+                f"{ord_current:,.0f} orders",
+                ord_delta
             )
             st.info(summary)
 #───────────────────── AOV KPI Card & line graph───────────────────────────
@@ -139,13 +140,13 @@ if uploaded_file is None:
      (df_AOV['year_month']>=start_date) &
      (df_AOV['year_month']<=end_date)
      ]
-     current=df_filtered['aov'].iloc[-1]
-     previous=df_filtered['aov'].iloc[-2]
-     delta=(current-previous)/previous*100
+     aov_current=df_filtered['aov'].iloc[-1]
+     aov_previous=df_filtered['aov'].iloc[-2]
+     aov_delta=(aov_current-aov_previous)/aov_previous*100
      st.metric(
        label="AOV",
-       value=f"{current:,.0f}",
-       delta=f"{delta:.1f}%"
+       value=f"{aov_current:,.0f}",
+       delta=f"{aov_delta:.1f}%"
      )
      fig = px.line(                
         df_filtered,        
@@ -159,8 +160,8 @@ if uploaded_file is None:
         with st.spinner("Generating insight..."):
             summary = generate_kpi_summary(
                 "AOV",
-                f" {current:,.0f}",
-                delta
+                f" {aov_current:,.0f}",
+                aov_delta
             )
             st.info(summary)
 #───────────────────── SLA_Compliance KPI Card & line graph───────────────────────────
@@ -170,13 +171,13 @@ if uploaded_file is None:
      (df_SLA['year_month']>=start_date) &
      (df_SLA['year_month']<=end_date)
      ]
-     current=df_filtered['sla_compliance_pct'].iloc[-1]
-     previous=df_filtered['sla_compliance_pct'].iloc[-2]
-     delta=(current-previous)/previous*100
+     sla_current=df_filtered['sla_compliance_pct'].iloc[-1]
+     sla_previous=df_filtered['sla_compliance_pct'].iloc[-2]
+     sla_delta=(sla_current-sla_previous)/sla_previous*100
      st.metric(
        label="SLA Compliance",
-       value=f"{current:,.1f}%",
-       delta=f"{delta:.1f}%"
+       value=f"{sla_current:,.1f}%",
+       delta=f"{sla_delta:.1f}%"
      )
      fig = px.line(                
         df_filtered,        
@@ -190,8 +191,8 @@ if uploaded_file is None:
         with st.spinner("Generating insight..."):
             summary = generate_kpi_summary(
                 "SLA Compliance",
-                f"{current:,.1f}",
-                delta
+                f"{sla_current:,.1f}",
+                sla_delta
             )
             st.info(summary)
      st.markdown("---")  # divider line
@@ -203,11 +204,11 @@ if uploaded_file is None:
         # Revenue summary
         df_rev = get_monthly_revenue()
         df_f = df_rev[(df_rev['year_month']>=start_date) & (df_rev['year_month']<=end_date)]
-        current = df_f['total_revenue'].iloc[-1]
-        previous = df_f['total_revenue'].iloc[-2]
-        delta = (current-previous)/previous*100
+        rev_current = df_f['total_revenue'].iloc[-1]
+        rev_previous = df_f['total_revenue'].iloc[-2]
+        rev_delta = (rev_current-rev_previous)/rev_previous*100
         st.write("**Revenue:**")
-        st.info(generate_kpi_summary("Total Revenue", f"R$ {current:,.0f}", delta))
+        st.info(generate_kpi_summary("Total Revenue", f"R$ {rev_current:,.0f}", rev_delta))
         
         # Orders summary
         df_order_volume= get_order_volume()
@@ -215,11 +216,11 @@ if uploaded_file is None:
         (df_order_volume['year_month']>=start_date) &
         (df_order_volume['year_month']<=end_date)
         ]
-        current=df_filtered['total_orders'].iloc[-1]
-        previous=df_filtered['total_orders'].iloc[-2]
-        delta=(current-previous)/previous*100
+        ord_current=df_filtered['total_orders'].iloc[-1]
+        ord_previous=df_filtered['total_orders'].iloc[-2]
+        ord_delta=(ord_current-ord_previous)/ord_previous*100
         st.write("**Order Volume:**")
-        st.info(generate_kpi_summary("Order Volume", f" {current:,.0f} order", delta))
+        st.info(generate_kpi_summary("Order Volume", f" {ord_current:,.0f} order", ord_delta))
 
         # AOV summary
         df_AOV= get_AOV()
@@ -227,11 +228,11 @@ if uploaded_file is None:
         (df_AOV['year_month']>=start_date) &
         (df_AOV['year_month']<=end_date)
         ]
-        current=df_filtered['aov'].iloc[-1]
-        previous=df_filtered['aov'].iloc[-2]
-        delta=(current-previous)/previous*100
+        aov_current=df_filtered['aov'].iloc[-1]
+        aov_previous=df_filtered['aov'].iloc[-2]
+        aov_delta=(aov_current-aov_previous)/aov_previous*100
         st.write("**AOV:**")
-        st.info(generate_kpi_summary("AOV", f"{current:,.0f}", delta))
+        st.info(generate_kpi_summary("AOV", f"{aov_current:,.0f}", aov_delta))
 
         # SLA summary
         df_SLA= get_SLA_Compliance_byMonth()
@@ -239,11 +240,11 @@ if uploaded_file is None:
         (df_SLA['year_month']>=start_date) &
         (df_SLA['year_month']<=end_date)
         ]
-        current=df_filtered['sla_compliance_pct'].iloc[-1]
-        previous=df_filtered['sla_compliance_pct'].iloc[-2]
-        delta=(current-previous)/previous*100
+        sla_current=df_filtered['sla_compliance_pct'].iloc[-1]
+        sla_previous=df_filtered['sla_compliance_pct'].iloc[-2]
+        sla_delta=(sla_current-sla_previous)/sla_previous*100
         st.write("**SLA Compliance:**")
-        st.info(generate_kpi_summary("SLA Compliance", f"{current:,.1f}", delta))
+        st.info(generate_kpi_summary("SLA Compliance", f"{sla_current:,.1f}", sla_delta))
         # your generate_kpi_summary call here
 #───────────────────── Category wise revenue & treemap───────────────────────────
      with col_left:
@@ -323,3 +324,35 @@ else:
             title=f'{value_col} over time'
            )
           st.plotly_chart(fig)
+
+#---------------------Download button-------------------------------------------------
+
+kpi_data = {
+            'start_date': start_date,
+            'end_date': end_date,
+            'kpis': [
+                {'name': 'Total Revenue', 
+                 'value': f"R$ {rev_current:,.0f}", 
+                 'delta': f"{rev_delta:.1f}%", 
+                 'summary': generate_kpi_summary("Total Revenue", f"R$ {rev_current:,.0f}", rev_delta)
+                },
+                {'name': 'Order Volume', 
+                 'value': f"R${ord_current:,.0f}", 
+                 'delta': f"{ord_delta:.1f}%", 
+                 'summary': generate_kpi_summary("Order Volume", f"{ord_current:,.0f}", ord_delta)
+                },
+                {'name': 'AOV', 
+                 'value': f"{aov_current:,.0f}", 
+                 'delta': f"{aov_delta:.1f}%", 
+                 'summary': generate_kpi_summary("AOV", f"{aov_current:,.0f}", aov_delta)
+                },
+                {'name': 'SLA Compliance', 
+                 'value': f"{sla_current:.1f}%", 
+                 'delta': f"{sla_delta:.1f}%", 
+                 'summary': generate_kpi_summary("SLA Compliance", f"{sla_current:.1f}", sla_delta)
+                },
+            ]
+        }
+pdf = generate_pdf(kpi_data)
+st.download_button(label="📥 Download PDF Report", data=pdf, file_name="InsightIQ_Report.pdf", mime="application/pdf")
+
