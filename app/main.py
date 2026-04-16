@@ -200,54 +200,72 @@ if uploaded_file is None:
    if st.button("📊 Generate Full Report"):
      with st.spinner("Generating full report..."):
         st.subheader("📋 Executive Summary Report")
+    #-----------------------------KPI threshold alert system---------------------------------------------------------
+   st.subheader("KPI Warnings")
+   if rev_delta<-20:
+    st.error(f"🔴 Revenue dropped {rev_delta:.1f}% — Critical!")
+   else:
+    st.success("🟢 Revenue is good!")
+   if ord_delta<-15:
+    st.warning("🟡 Order Volume declining!")
+   else:
+    st.success("🟢 Order Volume is good!")
+   if aov_delta<-10:
+    st.error(f"🔴 AOV dropped {aov_delta:.1f}% — Critical!")
+   else:
+    st.success("🟢AOV is good!")
+   if sla_current<85:
+    st.warning(f"🟡 SLA Compliance at {sla_current:.1f}% — below 85% target!")
+   else:
+    st.success("🟢 SLA is good!")
         
-        # Revenue summary
-        df_rev = get_monthly_revenue()
-        df_f = df_rev[(df_rev['year_month']>=start_date) & (df_rev['year_month']<=end_date)]
-        rev_current = df_f['total_revenue'].iloc[-1]
-        rev_previous = df_f['total_revenue'].iloc[-2]
-        rev_delta = (rev_current-rev_previous)/rev_previous*100
-        st.write("**Revenue:**")
-        st.info(generate_kpi_summary("Total Revenue", f"R$ {rev_current:,.0f}", rev_delta))
+    #------------------------------------Revenue summary---------------------------------------------
+    df_rev = get_monthly_revenue()
+    df_f = df_rev[(df_rev['year_month']>=start_date) & (df_rev['year_month']<=end_date)]
+    rev_current = df_f['total_revenue'].iloc[-1]
+    rev_previous = df_f['total_revenue'].iloc[-2]
+    rev_delta = (rev_current-rev_previous)/rev_previous*100
+    st.write("**Revenue:**")
+    st.info(generate_kpi_summary("Total Revenue", f"R$ {rev_current:,.0f}", rev_delta))
         
-        # Orders summary
-        df_order_volume= get_order_volume()
-        df_filtered=df_order_volume[
-        (df_order_volume['year_month']>=start_date) &
-        (df_order_volume['year_month']<=end_date)
-        ]
-        ord_current=df_filtered['total_orders'].iloc[-1]
-        ord_previous=df_filtered['total_orders'].iloc[-2]
-        ord_delta=(ord_current-ord_previous)/ord_previous*100
-        st.write("**Order Volume:**")
-        st.info(generate_kpi_summary("Order Volume", f" {ord_current:,.0f} order", ord_delta))
+    #----------------------------------- Orders summary----------------------------------------------
+    df_order_volume= get_order_volume()
+    df_filtered=df_order_volume[
+    (df_order_volume['year_month']>=start_date) &
+    (df_order_volume['year_month']<=end_date)
+    ]
+    ord_current=df_filtered['total_orders'].iloc[-1]
+    ord_previous=df_filtered['total_orders'].iloc[-2]
+    ord_delta=(ord_current-ord_previous)/ord_previous*100
+    st.write("**Order Volume:**")
+    st.info(generate_kpi_summary("Order Volume", f" {ord_current:,.0f} order", ord_delta))
 
-        # AOV summary
-        df_AOV= get_AOV()
-        df_filtered=df_AOV[
-        (df_AOV['year_month']>=start_date) &
-        (df_AOV['year_month']<=end_date)
-        ]
-        aov_current=df_filtered['aov'].iloc[-1]
-        aov_previous=df_filtered['aov'].iloc[-2]
-        aov_delta=(aov_current-aov_previous)/aov_previous*100
-        st.write("**AOV:**")
-        st.info(generate_kpi_summary("AOV", f"{aov_current:,.0f}", aov_delta))
+    #-----------------------------------  AOV summary----------------------------------------------
+    df_AOV= get_AOV()
+    df_filtered=df_AOV[
+    (df_AOV['year_month']>=start_date) &
+    (df_AOV['year_month']<=end_date)
+    ]
+    aov_current=df_filtered['aov'].iloc[-1]
+    aov_previous=df_filtered['aov'].iloc[-2]
+    aov_delta=(aov_current-aov_previous)/aov_previous*100
+    st.write("**AOV:**")
+    st.info(generate_kpi_summary("AOV", f"{aov_current:,.0f}", aov_delta))
 
-        # SLA summary
-        df_SLA= get_SLA_Compliance_byMonth()
-        df_filtered=df_SLA[
-        (df_SLA['year_month']>=start_date) &
-        (df_SLA['year_month']<=end_date)
-        ]
-        sla_current=df_filtered['sla_compliance_pct'].iloc[-1]
-        sla_previous=df_filtered['sla_compliance_pct'].iloc[-2]
-        sla_delta=(sla_current-sla_previous)/sla_previous*100
-        st.write("**SLA Compliance:**")
-        st.info(generate_kpi_summary("SLA Compliance", f"{sla_current:,.1f}", sla_delta))
+    #-----------------------------------  SLA summary----------------------------------------------
+    df_SLA= get_SLA_Compliance_byMonth()
+    df_filtered=df_SLA[
+    (df_SLA['year_month']>=start_date) &
+    (df_SLA['year_month']<=end_date)
+    ]
+    sla_current=df_filtered['sla_compliance_pct'].iloc[-1]
+    sla_previous=df_filtered['sla_compliance_pct'].iloc[-2]
+    sla_delta=(sla_current-sla_previous)/sla_previous*100
+    st.write("**SLA Compliance:**")
+    st.info(generate_kpi_summary("SLA Compliance", f"{sla_current:,.1f}", sla_delta))
         # your generate_kpi_summary call here
 #───────────────────── Category wise revenue & treemap───────────────────────────
-     with col_left:
+    with col_left:
         df_category=get_category_wise_sales_growth()
         df_filtered=df_category[
         (df_category['year_month']>=start_date) &
@@ -262,13 +280,13 @@ if uploaded_file is None:
         )
         st.plotly_chart(fig)
 
-     with col_right:
+    with col_right:
        pass # empty for now — add chart later!
 
 #─────────────────────Seller leaderboard table with sort/filter────────────────
-     df_seller_leaderboard=get_seller_performance_score()
-     seller_leaderboard=df_seller_leaderboard.sort_values(by='average_review_score',ascending=False)
-     fig=go.Figure(data=[go.Table(
+    df_seller_leaderboard=get_seller_performance_score()
+    seller_leaderboard=df_seller_leaderboard.sort_values(by='average_review_score',ascending=False)
+    fig=go.Figure(data=[go.Table(
         header=dict(
         values=list(seller_leaderboard.columns),
         fill_color='black',
@@ -282,9 +300,9 @@ if uploaded_file is None:
       )
   )])
 
-     fig.update_layout(title='Leaderboard')
+    fig.update_layout(title='Leaderboard')
 #fig.show()
-     st.plotly_chart(fig)
+    st.plotly_chart(fig)
 #-------------------------CSV File---------------------------------------
 else:
   st.sidebar.markdown("---")
@@ -355,4 +373,5 @@ kpi_data = {
         }
 pdf = generate_pdf(kpi_data)
 st.download_button(label="📥 Download PDF Report", data=pdf, file_name="InsightIQ_Report.pdf", mime="application/pdf")
+
 
