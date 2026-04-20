@@ -5,14 +5,13 @@
 from urllib.parse import quote_plus
 import pandas as pd
 from sqlalchemy import create_engine
+from dotenv import load_dotenv
+import os
 
 # ── DB CONNECTION ──────────────────────────────────────────
+load_dotenv()
 def get_connection():
-    password = quote_plus("KinuVanu@91")  # ← handles special characters!
-    engine = create_engine(
-        f"postgresql+psycopg2://postgres:{password}@localhost:5432/insightiq"
-    )
-    return engine
+    return create_engine(os.getenv("DATABASE_URL"))
 # ── KPI 1: a.MONTHLY REVENUE ─────────────────────────────────
 def get_monthly_revenue():
     engine = get_connection()

@@ -1,7 +1,7 @@
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
-from textwrap import wrap  # ← add this!
+from textwrap import wrap
 from io import BytesIO
 
 def generate_pdf(kpi_data):
