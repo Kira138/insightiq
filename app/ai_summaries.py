@@ -12,7 +12,6 @@ client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 # ── GENERATE KPI SUMMARY,Three values get passed in — kpi_name, current_value, delta. context defaults to "" since it wasn't provided. ──────────────────────────────────
 def generate_kpi_summary(kpi_name, current_value, delta, context=""):
-#Claude receives this as its instruction giving it the role of a business analyst and telling it exactly what to write.
     prompt = f"""   
     You are a business analyst. Write a 2-sentence executive summary for this KPI:
     
@@ -23,14 +22,15 @@ def generate_kpi_summary(kpi_name, current_value, delta, context=""):
     
     Be concise, business-focused, and actionable.
     """
-#── prompt is sent to Claude Haiku. Claude reads it and generates a 2-sentence executive summary, capped at 150 tokens.
-    message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=150,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    
-    return message.content[0].text
+    try:
+        message = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=150,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return message.content[0].text
+    except Exception as e:
+        return f"AI summary unavailable. {kpi_name} is currently at {current_value} with {delta:.1f}% change."
 
 if __name__ == "__main__":
     summary = generate_kpi_summary("Revenue", "R$ 985,414", -4.1)
