@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 # ── INITIALIZE CLIENT, Setup (runs once at import time) ─────────────────────────────────────
 load_dotenv()
-client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 # ── GENERATE KPI SUMMARY,Three values get passed in — kpi_name, current_value, delta. context defaults to "" since it wasn't provided. ──────────────────────────────────
 def generate_kpi_summary(kpi_name, current_value, delta, context=""):
